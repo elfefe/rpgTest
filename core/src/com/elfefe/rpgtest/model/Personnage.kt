@@ -3,15 +3,16 @@ package com.elfefe.rpgtest.model
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
-import com.elfefe.rpgtest.RpgTest
+import com.elfefe.rpgtest.utils.clampToFarthest
+import com.elfefe.rpgtest.utils.normalizeDirection
+import java.lang.Float.max
+import java.lang.Float.min
 import kotlin.math.abs
 
-class Personnage(val texture: Texture) {
+class Personnage(private val texture: Texture) {
     var animation: Animation<TextureRegion>
     var frames: Array<TextureRegion>
 
@@ -19,7 +20,7 @@ class Personnage(val texture: Texture) {
     val position = Vector2()
     val velocity = Vector2()
 
-    var walkspeed = 1f
+    var walkspeed = 100f
 
     init {
         val initWizardTextureRegion = TextureRegion.split(
@@ -41,21 +42,22 @@ class Personnage(val texture: Texture) {
     }
 
     fun move(direction: Vector2) {
+        val dir = direction.cpy().apply {
+            x -= BLACK_WIZARD_WALK_SIZE / 2
+            y -= BLACK_WIZARD_WALK_SIZE / 2
+        }
         val speed = walkspeed * Gdx.graphics.deltaTime
-        val absolutePosition = position
-
-        absolutePosition.x = (absolutePosition.x / abs(absolutePosition.x)) * speed
-        absolutePosition.y = (absolutePosition.y / abs(absolutePosition.y)) * speed
-
-        val pos = Vector2(
-                MathUtils.clamp(position.x + absolutePosition.x, lastPosition.x, direction.x),
-                MathUtils.clamp(position.y + absolutePosition.y, lastPosition.y, direction.y)
+        val distance = dir.cpy().sub(position)
+        val normalizeDirection = normalizeDirection(distance).scl(speed)
+        val pos = clampToFarthest(
+                position.add(normalizeDirection),
+                lastPosition,
+                dir
         )
+
 
         lastPosition.set(position)
         position.set(pos)
-
-        if (idle()) println("Idle")
     }
 
     fun currentFrame(stateTime: Float): TextureRegion? {
