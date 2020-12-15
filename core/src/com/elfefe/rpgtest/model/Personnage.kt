@@ -4,15 +4,11 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.elfefe.rpgtest.utils.clampToFarthest
 import com.elfefe.rpgtest.utils.normalizeDirection
-import java.lang.Float.max
-import java.lang.Float.min
-import kotlin.math.abs
 
-class Personnage(private val texture: Texture) {
+class Personnage(private val texture: Texture, var size: Int) {
     var animation: Animation<TextureRegion>
     var frames: Array<TextureRegion>
 
@@ -25,15 +21,15 @@ class Personnage(private val texture: Texture) {
     init {
         val initWizardTextureRegion = TextureRegion.split(
                 texture,
-                BLACK_WIZARD_WALK_SIZE,
-                BLACK_WIZARD_WALK_SIZE
+                size,
+                size
         )
 
         frames = initWizardTextureRegion[0]
 
         animation = Animation(0.1f, *frames)
-        position.x = Gdx.graphics.width / 2f - BLACK_WIZARD_WALK_SIZE / 2f
-        position.y = Gdx.graphics.height / 2f - BLACK_WIZARD_WALK_SIZE / 2f
+        position.x = Gdx.graphics.width / 2f - size / 2f
+        position.y = Gdx.graphics.height / 2f - size / 2f
     }
 
 
@@ -43,8 +39,8 @@ class Personnage(private val texture: Texture) {
 
     fun move(direction: Vector2) {
         val dir = direction.cpy().apply {
-            x -= BLACK_WIZARD_WALK_SIZE / 2
-            y -= BLACK_WIZARD_WALK_SIZE / 2
+            x -= size / 2
+            y -= size / 2
         }
         val speed = walkspeed * Gdx.graphics.deltaTime
         val distance = dir.cpy().sub(position)
@@ -66,9 +62,5 @@ class Personnage(private val texture: Texture) {
 
     fun dispose() {
         texture.dispose()
-    }
-
-    companion object {
-        private const val BLACK_WIZARD_WALK_SIZE = 64
     }
 }

@@ -2,9 +2,7 @@ package com.elfefe.rpgtest
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.GL30
-import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
@@ -31,31 +29,39 @@ class RpgTest : ApplicationAdapter() {
     private lateinit var autoTiler: AutoTiler
     private lateinit var map: TiledMap
 
-    private val mouseInWorld2D = Vector2()
-    private val mouseInWorld3D = Vector3()
+    private lateinit var circle: Pixmap
+    private lateinit var circleTexture: Texture
+
+    private lateinit var mousePosition: Vector3
 
     private lateinit var blackWizard: Personnage
 
     override fun create() {
         batch = SpriteBatch()
 
+        circle = Pixmap(8, 8, Pixmap.Format.RGBA8888)
+        circle.setColor(Color.BLACK)
+        circle.fillCircle(4, 4, 2)
+        circleTexture = Texture(circle)
+
         autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
         map = autoTiler.generateMap()
 
         // Setup camera
         camera = OrthographicCamera()
-        viewport = FitViewport(MAP_WIDTH.toFloat(), MAP_HEIGHT.toFloat(), camera)
+        viewport = FitViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(), camera)
 
         // Setup map renderer
-        val unitScale = 1f / max(autoTiler.tileWidth, autoTiler.tileHeight)
-        renderer = OrthogonalTiledMapRenderer(map, unitScale)
+        val unitScale = 1f / max(MAP_WIDTH / Gdx.graphics.width, MAP_HEIGHT / Gdx.graphics.height)
+        renderer = OrthogonalTiledMapRenderer(map, batch)
 
-        blackWizard = Personnage(Texture("black_wizard_walking.png"))
+        blackWizard = Personnage(Texture("black_wizard_walking.png"), 64)
     }
 
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
-        viewport.update(width, height)
+        viewport.update(width, height, true)
+        camera.update()
 
         autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
         map = autoTiler.generateMap()
@@ -70,9 +76,10 @@ class RpgTest : ApplicationAdapter() {
         renderer.setView(camera)
         renderer.render()
 
+        mousePosition = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
         if (Gdx.input.isTouched) {
-            clickPosition.x = Gdx.input.x.toFloat()
-            clickPosition.y = (-Gdx.input.y + Gdx.graphics.height).toFloat()
+            clickPosition.x = mousePosition.x
+            clickPosition.y = mousePosition.y
         }
 
         batch.begin()
@@ -80,6 +87,7 @@ class RpgTest : ApplicationAdapter() {
         blackWizard.move(clickPosition)
 
         batch.draw(blackWizard, stateTime)
+        batch.draw(circleTexture, clickPosition.x, clickPosition.y)
 
         batch.end()
     }

@@ -10,6 +10,6 @@ import java.lang.Float.min
 import kotlin.math.abs
 import kotlin.math.round
 
-fun Batch.draw (personnage: Personnage, stateTime: Float) {
-    draw(personnage.currentFrame(stateTime), personnage.position.x, personnage.position.y)
+fun Batch.draw (personnage: Personnage, stateTime: Float, width: Int = personnage.size, height: Int = personnage.size) {
+    draw(personnage.currentFrame(stateTime), personnage.position.x, personnage.position.y, width.toFloat(), height.toFloat())
 }
