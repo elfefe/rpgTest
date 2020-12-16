@@ -10,8 +10,13 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.elfefe.rpgtest.model.House
 import com.elfefe.rpgtest.model.Personnage
+import com.elfefe.rpgtest.model.Player
+import com.elfefe.rpgtest.utils.addEntities
 import com.elfefe.rpgtest.utils.draw
+import com.elfefe.rpgtest.utils.entities
+import com.elfefe.rpgtest.utils.set
 import net.gpdev.autotile.AutoTiler
 import kotlin.math.max
 
@@ -34,7 +39,8 @@ class RpgTest : ApplicationAdapter() {
 
     private lateinit var mousePosition: Vector3
 
-    private lateinit var blackWizard: Personnage
+    private lateinit var player: Player
+    private lateinit var house: House
 
     override fun create() {
         batch = SpriteBatch()
@@ -55,7 +61,13 @@ class RpgTest : ApplicationAdapter() {
         val unitScale = 1f / max(MAP_WIDTH / Gdx.graphics.width, MAP_HEIGHT / Gdx.graphics.height)
         renderer = OrthogonalTiledMapRenderer(map, batch)
 
-        blackWizard = Personnage(Texture("black_wizard_walking.png"), 64)
+        player = Player("black_wizard_walking.png", 64)
+        house = House("house_1.png")
+
+        entities.addEntities(
+                player,
+                house
+        )
     }
 
     override fun resize(width: Int, height: Int) {
@@ -82,11 +94,28 @@ class RpgTest : ApplicationAdapter() {
             clickPosition.y = mousePosition.y
         }
 
+        entities.forEach { entity ->
+            if (entity.id != player.id) {
+                var isTouching = false
+                player.physicLayer.forEach { layer ->
+                    if (entity.physicLayer.contains(layer) && player.collider().overlaps(entity.collider())) {
+                        isTouching = true
+                    }
+                }
+                player.isBlocked = isTouching
+            }
+        }
+
         batch.begin()
 
-        blackWizard.move(clickPosition)
+        batch.draw(house.apply {
+            position.set(this, Gdx.graphics.width / 2f, Gdx.graphics.height / 2f)
+        })
 
-        batch.draw(blackWizard, stateTime)
+        batch.draw(player.apply {
+            move(clickPosition)
+        }, stateTime)
+
         batch.draw(circleTexture, clickPosition.x, clickPosition.y)
 
         batch.end()
@@ -94,7 +123,7 @@ class RpgTest : ApplicationAdapter() {
 
     override fun dispose() {
         batch.dispose()
-        blackWizard.dispose()
+        player.dispose()
     }
 
     private fun drawBackground() {

@@ -6,19 +6,29 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.elfefe.rpgtest.utils.clampToFarthest
+import com.elfefe.rpgtest.utils.ids
 import com.elfefe.rpgtest.utils.normalizeDirection
+import com.elfefe.rpgtest.utils.set
 
-class Personnage(private val texture: Texture, var size: Int) {
+open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
+    override var layer = 0
+    final override val physicLayer = ArrayList<Int>()
+    final override val position = Vector2(0f, 0f)
+
     var animation: Animation<TextureRegion>
     var frames: Array<TextureRegion>
 
     private val lastPosition = Vector2()
-    val position = Vector2()
     val velocity = Vector2()
 
     var walkspeed = 100f
 
+    var isBlocked = false
+
     init {
+        physicLayer.add(0)
+        setSize(size.toFloat(), size.toFloat() / 2f)
+
         val initWizardTextureRegion = TextureRegion.split(
                 texture,
                 size,
@@ -28,8 +38,6 @@ class Personnage(private val texture: Texture, var size: Int) {
         frames = initWizardTextureRegion[0]
 
         animation = Animation(0.1f, *frames)
-        position.x = Gdx.graphics.width / 2f - size / 2f
-        position.y = Gdx.graphics.height / 2f - size / 2f
     }
 
 
@@ -46,21 +54,21 @@ class Personnage(private val texture: Texture, var size: Int) {
         val distance = dir.cpy().sub(position)
         val normalizeDirection = normalizeDirection(distance).scl(speed)
         val pos = clampToFarthest(
-                position.add(normalizeDirection),
+                position.cpy().add(normalizeDirection),
                 lastPosition,
                 dir
         )
 
 
-        lastPosition.set(position)
-        position.set(pos)
+        if (!isBlocked) {
+            lastPosition.set(position)
+            position.set(this, pos)
+        } else {
+            position.set(lastPosition)
+        }
     }
 
     fun currentFrame(stateTime: Float): TextureRegion? {
         return animation.getKeyFrame(stateTime, true)
-    }
-
-    fun dispose() {
-        texture.dispose()
     }
 }
