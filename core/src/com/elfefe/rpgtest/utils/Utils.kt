@@ -34,3 +34,7 @@ fun Vector2.set(entity: Entity, position: Vector2) {
     entity.setPosition(position.x, position.y)
     set(position.x, position.y)
 }
+
+fun castRay() {
+
+}

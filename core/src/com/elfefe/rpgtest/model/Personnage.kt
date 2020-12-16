@@ -59,12 +59,12 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
                 dir
         )
 
-
         if (!isBlocked) {
             lastPosition.set(position)
             position.set(this, pos)
         } else {
-            position.set(lastPosition)
+            println("${javaClass.simpleName} stuck $position last $lastPosition")
+            position.set(this, lastPosition)
         }
     }
 
