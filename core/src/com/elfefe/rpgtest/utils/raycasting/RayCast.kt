@@ -3,9 +3,7 @@ package com.elfefe.rpgtest.utils.raycasting
 import com.badlogic.gdx.math.Vector2
 import java.lang.Float.MAX_VALUE
 import java.util.*
-import kotlin.math.floor
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 object RayCast {
     private const val EPSILON = 0.000001
@@ -13,10 +11,11 @@ object RayCast {
     // Find intersection of RAY & SEGMENT
     // returns null if no intersection found
     private fun getIntersection(ray: LineSegment, segment: LineSegment): Vector2? {
-        val r = Vector2(ray.B.x - ray.A.x, ray.B.y - ray.A.y)
-        val s = Vector2(segment.B.x - segment.A.x, segment.B.y - segment.A.y)
+
+        val r = ray.B.cpy().sub(ray.A)
+        val s = segment.B.cpy().sub(segment.A)
         val rxs = r.crs(s)
-        val qp = Vector2(segment.A.x - ray.A.x, segment.A.y - ray.A.y)
+        val qp = segment.A.cpy().sub(ray.A)
         val qpxr = qp.crs(r)
 
         // If r x s = 0 and (q - p) x r = 0, then the two lines are collinear.
@@ -47,12 +46,11 @@ object RayCast {
         return if (rxs >= EPSILON && 0 <= t && t <= 1 && 0 <= u && u <= 1) {
             // We can calculate the intersection Vector2 using either t or u.
             //intersection = p + t*r;
-            Vector2(floor(ray.A.x + t * r.x).toFloat(), floor(ray.A.y + t * r.y).toFloat())
+            Vector2(floor(ray.A.x + t * r.x), floor(ray.A.y + t * r.y))
 
             // An intersection was found.
             //return true;
         } else null
-
         // 5. Otherwise, the two line segments are not parallel but do not intersect.
     }
 
@@ -60,19 +58,26 @@ object RayCast {
         var closestIntersect: Vector2? = null
         var closestDistance: Float = MAX_VALUE
         for (l in segments) {
-            val intersect = getIntersection(ray, l) ?: continue
-            if (closestIntersect == null || ray.A.dst(intersect)< closestDistance) {
-                closestIntersect = intersect
-                closestDistance = ray.A.dst(intersect)
-            }
-        }
-        for (l in segments) {
-            val intersect = getIntersection(l, ray) ?: continue
+            val intersect = getIntersection(ray, l) ?: getIntersection(l, ray) ?: continue
             if (closestIntersect == null || ray.A.dst(intersect) < closestDistance) {
                 closestIntersect = intersect
                 closestDistance = ray.A.dst(intersect)
             }
         }
         return closestIntersect
+    }
+
+
+
+    fun castRays(src: Vector2, n: Int, dist: Int, segments: ArrayList<LineSegment>): ArrayList<Vector2> {
+        val result = ArrayList<Vector2>()
+        val angleDiv = 2 * Math.PI / n
+        for (i in 0 until n) {
+            val target = Vector2((src.x + cos(angleDiv * i) * dist).toFloat(), (src.y + sin(angleDiv * i) * dist).toFloat())
+            val ray = LineSegment(src, target)
+            val ci = RayCast.getClosestIntersection(ray, segments)
+            if (ci != null) result.add(ci) else result.add(target)
+        }
+        return result
     }
 }

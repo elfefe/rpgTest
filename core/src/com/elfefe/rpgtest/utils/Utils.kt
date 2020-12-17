@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
 import com.elfefe.rpgtest.RpgTest
 import com.elfefe.rpgtest.model.Entity
+import com.elfefe.rpgtest.model.Layer
 import com.elfefe.rpgtest.model.Personnage
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import java.lang.Float.max
@@ -47,7 +48,7 @@ val Rectangle.segments: ArrayList<LineSegment>
             LineSegment(Vector2(x, y + height), Vector2(x, y))
     )
 
-val debugRenderer = ShapeRenderer()
+val debugRenderer by lazy { ShapeRenderer() }
 
 fun drawDebugLine(start: Vector2, end: Vector2) {
     Gdx.gl.glEnable(GL20.GL_ARRAY_BUFFER_BINDING)
@@ -56,4 +57,10 @@ fun drawDebugLine(start: Vector2, end: Vector2) {
     debugRenderer.line(start, end)
     debugRenderer.end()
     Gdx.gl.glDisable(GL20.GL_BLEND)
+}
+
+fun ArrayList<Layer>.contains(index: Int): Boolean {
+    var isContained = false
+    forEach { if (it.index == index) isContained = true }
+    return isContained
 }

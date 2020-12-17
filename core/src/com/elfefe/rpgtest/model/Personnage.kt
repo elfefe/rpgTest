@@ -4,15 +4,21 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.profiling.GLProfiler
+import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Vector2
 import com.elfefe.rpgtest.RpgTest
 import com.elfefe.rpgtest.utils.*
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import com.elfefe.rpgtest.utils.raycasting.RayCast
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.sin
 
 open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     override var layer = 0
-    final override val physicLayer = ArrayList<Int>()
+    final override val physicLayer = ArrayList<Layer>()
     final override val position = Vector2(0f, 0f)
 
     var animation: Animation<TextureRegion>
@@ -27,7 +33,7 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     var isBlocked = false
 
     init {
-        physicLayer.add(0)
+        physicLayer.add(PhysicLayers.ENTITY)
         setSize(size.toFloat(), size.toFloat() / 2f)
 
         val initWizardTextureRegion = TextureRegion.split(
@@ -47,16 +53,10 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     }
 
     fun move(direction: Vector2, segments: ArrayList<LineSegment>) {
-
         val dir = direction.cpy().apply {
+            x -= size / 2
+            y -= size / 2
         }
-        val raySegment = LineSegment(position.cpy().apply {
-            x += size / 2
-            y += size / 2
-        }, dir)
-
-        ray.set(RayCast.getClosestIntersection(raySegment, segments))
-
         val speed = walkspeed * Gdx.graphics.deltaTime
         val distance = dir.cpy().sub(position)
         val normalizeDirection = normalizeDirection(distance).scl(speed)
@@ -66,7 +66,18 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
                 dir
         )
 
-        if (!isBlocked) {
+        val rayPos = pos.cpy().apply {
+            x += size / 2
+            y += size / 2
+        }
+        val rays = RayCast.castRays(rayPos, 10, 12, segments)
+
+        var intersect = Float.MAX_VALUE
+        rays.forEach {
+            intersect = min(rayPos.cpy().dst(it), intersect)
+        }
+
+        if (abs(intersect) > 10) {
             lastPosition.set(position)
             position.set(this, pos)
         }

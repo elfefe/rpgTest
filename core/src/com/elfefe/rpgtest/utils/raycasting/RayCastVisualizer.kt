@@ -10,6 +10,8 @@ import java.util.*
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Created by Armin on 9/21/2017.
@@ -82,7 +84,7 @@ class RayCastVisualizer : JPanel(), MouseMotionListener {
     var currentRays = ArrayList<Vector2>()
     override fun mouseMoved(e: MouseEvent) {
         mousePos = Vector2(e.x.toFloat(), e.y.toFloat())
-        currentRays = castRays(mousePos, 50, 800)
+        currentRays = castRays(mousePos, 12, 800)
         repaint()
     }
 
@@ -90,7 +92,7 @@ class RayCastVisualizer : JPanel(), MouseMotionListener {
         val result = ArrayList<Vector2>()
         val angle_div = 2 * Math.PI / n
         for (i in 0 until n) {
-            val target = Vector2((src.x + Math.cos(angle_div * i) * dist).toFloat(), (src.y + Math.sin(angle_div * i) * dist).toFloat())
+            val target = Vector2((src.x + cos(angle_div * i) * dist).toFloat(), (src.y + sin(angle_div * i) * dist).toFloat())
             val ray = LineSegment(src, target)
             val ci = RayCast.getClosestIntersection(ray, activeSegments)
             if (ci != null) result.add(ci) else result.add(target)

@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.profiling.GLProfiler
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
@@ -17,6 +18,8 @@ import com.elfefe.rpgtest.model.Player
 import com.elfefe.rpgtest.utils.*
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import net.gpdev.autotile.AutoTiler
+import java.util.ArrayList
+import javax.sound.sampled.Line
 import kotlin.math.max
 
 
@@ -77,7 +80,6 @@ class RpgTest : ApplicationAdapter() {
     }
 
     override fun render() {
-        println("Colliders: ${colliders.size}")
 
         drawBackground()
         stateTime += Gdx.graphics.deltaTime
@@ -97,7 +99,7 @@ class RpgTest : ApplicationAdapter() {
             if (entity.id != player.id) {
                 var isTouching = false
                 player.physicLayer.forEach { layer ->
-                    if (entity.physicLayer.contains(layer) && player.collider().overlaps(entity.collider())) {
+                    if (entity.physicLayer.contains(layer) && player.collider.overlaps(entity.collider)) {
                         isTouching = true
                     }
                 }
@@ -105,23 +107,25 @@ class RpgTest : ApplicationAdapter() {
             }
         }
 
-        house.collider().contains(clickPosition)
+        house.collider.contains(clickPosition)
 
         batch.begin()
 
         batch.draw(house.apply {
-            position.set(this, Gdx.graphics.width / 2f, Gdx.graphics.height / 2f)
+            position.set(this, Gdx.graphics.width / 4f, Gdx.graphics.height / 4f)
         })
 
         batch.draw(player.apply {
-            move(clickPosition, colliders)
+            move(clickPosition, colliders())
         }, stateTime)
 
         batch.draw(circleTexture, clickPosition.x, clickPosition.y)
 
         batch.end()
 
-        drawDebugLine(player.position, player.ray)
+        colliders().forEach {
+            drawDebugLine(it.A, it.B)
+        }
     }
 
     override fun dispose() {
@@ -139,6 +143,14 @@ class RpgTest : ApplicationAdapter() {
         private const val MAP_HEIGHT = 20
 
         val camera = OrthographicCamera()
-        val colliders = ArrayList<LineSegment>()
+
+        fun colliders(): ArrayList<LineSegment> {
+            val lineSegments = arrayListOf<LineSegment>()
+            entities.forEach {
+                if (!it.physicLayer.contains(1))
+                    lineSegments.addAll(it.collider.segments)
+            }
+            return lineSegments
+        }
     }
 }

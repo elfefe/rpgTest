@@ -10,15 +10,12 @@ import com.elfefe.rpgtest.utils.segments
 
 abstract class Entity(texturePath: String): Sprite(Texture(texturePath)) {
     abstract var layer: Int
-    abstract val physicLayer: ArrayList<Int>
+    abstract val physicLayer: ArrayList<Layer>
     abstract val position: Vector2
 
     val id: Int = ids
+    val collider: Rectangle
+        get() = boundingRectangle
 
-    fun collider(): Rectangle = boundingRectangle
     fun dispose() = texture.dispose()
-
-    init {
-        RpgTest.colliders.addAll(collider().segments)
-    }
 }
