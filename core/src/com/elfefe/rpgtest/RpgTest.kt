@@ -15,6 +15,7 @@ import com.elfefe.rpgtest.model.House
 import com.elfefe.rpgtest.model.Personnage
 import com.elfefe.rpgtest.model.Player
 import com.elfefe.rpgtest.utils.*
+import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import net.gpdev.autotile.AutoTiler
 import kotlin.math.max
 
@@ -139,5 +140,6 @@ class RpgTest : ApplicationAdapter() {
         private const val MAP_HEIGHT = 20
 
         val camera = OrthographicCamera()
+        val colliders = ArrayList<LineSegment>()
     }
 }

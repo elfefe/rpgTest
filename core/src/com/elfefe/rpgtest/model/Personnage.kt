@@ -54,7 +54,9 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
             x += size / 2
             y += size / 2
         }, dir)
+
         ray.set(RayCast.getClosestIntersection(raySegment, entity?.collider()?.segments ?: arrayListOf())?: dir)
+
         val speed = walkspeed * Gdx.graphics.deltaTime
         val distance = dir.cpy().sub(position)
         val normalizeDirection = normalizeDirection(distance).scl(speed)

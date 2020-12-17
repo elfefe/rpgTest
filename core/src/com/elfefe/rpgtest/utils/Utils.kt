@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
+import com.elfefe.rpgtest.RpgTest
 import com.elfefe.rpgtest.model.Entity
 import com.elfefe.rpgtest.model.Personnage
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
@@ -49,10 +50,10 @@ val Rectangle.segments: ArrayList<LineSegment>
 val debugRenderer = ShapeRenderer()
 
 fun drawDebugLine(start: Vector2, end: Vector2) {
-    Gdx.gl.glEnable(GL20.GL_ARRAY_BUFFER_BINDING);
+    Gdx.gl.glEnable(GL20.GL_ARRAY_BUFFER_BINDING)
     debugRenderer.begin(ShapeRenderer.ShapeType.Line)
     debugRenderer.color = Color.RED
     debugRenderer.line(start, end)
     debugRenderer.end()
-    Gdx.gl.glDisable(GL20.GL_BLEND);
+    Gdx.gl.glDisable(GL20.GL_BLEND)
 }
