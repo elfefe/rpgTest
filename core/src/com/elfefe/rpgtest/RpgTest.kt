@@ -77,6 +77,8 @@ class RpgTest : ApplicationAdapter() {
     }
 
     override fun render() {
+        println("Colliders: ${colliders.size}")
+
         drawBackground()
         stateTime += Gdx.graphics.deltaTime
 
@@ -85,8 +87,6 @@ class RpgTest : ApplicationAdapter() {
         renderer.setView(camera)
         renderer.render()
 
-        var collid: Entity? = null
-
         mousePosition = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
         if (Gdx.input.isTouched) {
             clickPosition.x = mousePosition.x
@@ -94,7 +94,6 @@ class RpgTest : ApplicationAdapter() {
         }
 
         entities.forEach { entity ->
-            if (entity.collider().contains(clickPosition)) collid = entity
             if (entity.id != player.id) {
                 var isTouching = false
                 player.physicLayer.forEach { layer ->
@@ -115,7 +114,7 @@ class RpgTest : ApplicationAdapter() {
         })
 
         batch.draw(player.apply {
-            move(clickPosition, collid)
+            move(clickPosition, colliders)
         }, stateTime)
 
         batch.draw(circleTexture, clickPosition.x, clickPosition.y)

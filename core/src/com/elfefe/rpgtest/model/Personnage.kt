@@ -46,7 +46,7 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
         return position == lastPosition
     }
 
-    fun move(direction: Vector2, entity: Entity? = null) {
+    fun move(direction: Vector2, segments: ArrayList<LineSegment>) {
 
         val dir = direction.cpy().apply {
         }
@@ -55,7 +55,7 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
             y += size / 2
         }, dir)
 
-        ray.set(RayCast.getClosestIntersection(raySegment, entity?.collider()?.segments ?: arrayListOf())?: dir)
+        ray.set(RayCast.getClosestIntersection(raySegment, segments))
 
         val speed = walkspeed * Gdx.graphics.deltaTime
         val distance = dir.cpy().sub(position)
