@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
-import com.elfefe.rpgtest.utils.clampToFarthest
-import com.elfefe.rpgtest.utils.ids
-import com.elfefe.rpgtest.utils.normalizeDirection
-import com.elfefe.rpgtest.utils.set
+import com.elfefe.rpgtest.RpgTest
+import com.elfefe.rpgtest.utils.*
+import com.elfefe.rpgtest.utils.raycasting.LineSegment
+import com.elfefe.rpgtest.utils.raycasting.RayCast
 
 open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     override var layer = 0
@@ -20,6 +20,7 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
 
     private val lastPosition = Vector2()
     val velocity = Vector2()
+    val ray: Vector2 = Vector2(0f, 0f)
 
     var walkspeed = 100f
 
@@ -45,11 +46,15 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
         return position == lastPosition
     }
 
-    fun move(direction: Vector2) {
+    fun move(direction: Vector2, entity: Entity? = null) {
+
         val dir = direction.cpy().apply {
-            x -= size / 2
-            y -= size / 2
         }
+        val raySegment = LineSegment(position.cpy().apply {
+            x += size / 2
+            y += size / 2
+        }, dir)
+        ray.set(RayCast.getClosestIntersection(raySegment, entity?.collider()?.segments ?: arrayListOf())?: dir)
         val speed = walkspeed * Gdx.graphics.deltaTime
         val distance = dir.cpy().sub(position)
         val normalizeDirection = normalizeDirection(distance).scl(speed)
@@ -62,9 +67,6 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
         if (!isBlocked) {
             lastPosition.set(position)
             position.set(this, pos)
-        } else {
-            println("${javaClass.simpleName} stuck $position last $lastPosition")
-            position.set(this, lastPosition)
         }
     }
 

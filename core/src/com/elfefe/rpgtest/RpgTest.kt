@@ -10,13 +10,11 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.elfefe.rpgtest.model.Entity
 import com.elfefe.rpgtest.model.House
 import com.elfefe.rpgtest.model.Personnage
 import com.elfefe.rpgtest.model.Player
-import com.elfefe.rpgtest.utils.addEntities
-import com.elfefe.rpgtest.utils.draw
-import com.elfefe.rpgtest.utils.entities
-import com.elfefe.rpgtest.utils.set
+import com.elfefe.rpgtest.utils.*
 import net.gpdev.autotile.AutoTiler
 import kotlin.math.max
 
@@ -28,7 +26,6 @@ class RpgTest : ApplicationAdapter() {
 
     private var stateTime = 0f
 
-    private lateinit var camera: OrthographicCamera
     private lateinit var viewport: Viewport
     private lateinit var renderer: OrthogonalTiledMapRenderer
     private lateinit var autoTiler: AutoTiler
@@ -54,7 +51,6 @@ class RpgTest : ApplicationAdapter() {
         map = autoTiler.generateMap()
 
         // Setup camera
-        camera = OrthographicCamera()
         viewport = FitViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(), camera)
 
         // Setup map renderer
@@ -88,6 +84,8 @@ class RpgTest : ApplicationAdapter() {
         renderer.setView(camera)
         renderer.render()
 
+        var collid: Entity? = null
+
         mousePosition = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
         if (Gdx.input.isTouched) {
             clickPosition.x = mousePosition.x
@@ -95,6 +93,7 @@ class RpgTest : ApplicationAdapter() {
         }
 
         entities.forEach { entity ->
+            if (entity.collider().contains(clickPosition)) collid = entity
             if (entity.id != player.id) {
                 var isTouching = false
                 player.physicLayer.forEach { layer ->
@@ -106,6 +105,8 @@ class RpgTest : ApplicationAdapter() {
             }
         }
 
+        house.collider().contains(clickPosition)
+
         batch.begin()
 
         batch.draw(house.apply {
@@ -113,12 +114,14 @@ class RpgTest : ApplicationAdapter() {
         })
 
         batch.draw(player.apply {
-            move(clickPosition)
+            move(clickPosition, collid)
         }, stateTime)
 
         batch.draw(circleTexture, clickPosition.x, clickPosition.y)
 
         batch.end()
+
+        drawDebugLine(player.position, player.ray)
     }
 
     override fun dispose() {
@@ -134,5 +137,7 @@ class RpgTest : ApplicationAdapter() {
     companion object {
         private const val MAP_WIDTH = 20
         private const val MAP_HEIGHT = 20
+
+        val camera = OrthographicCamera()
     }
 }

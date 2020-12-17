@@ -1,11 +1,14 @@
 package com.elfefe.rpgtest.utils
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.Vector
-import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.*
 import com.elfefe.rpgtest.model.Entity
 import com.elfefe.rpgtest.model.Personnage
+import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import java.lang.Float.max
 import java.lang.Float.min
 import kotlin.math.abs
@@ -35,6 +38,21 @@ fun Vector2.set(entity: Entity, position: Vector2) {
     set(position.x, position.y)
 }
 
-fun castRay() {
+val Rectangle.segments: ArrayList<LineSegment>
+    get() = arrayListOf(
+            LineSegment(Vector2(x, y), Vector2(x + width, y)),
+            LineSegment(Vector2(x + width, y), Vector2(x + width, y + height)),
+            LineSegment(Vector2(x + width, y + height), Vector2(x, y + height)),
+            LineSegment(Vector2(x, y + height), Vector2(x, y))
+    )
 
+val debugRenderer = ShapeRenderer()
+
+fun drawDebugLine(start: Vector2, end: Vector2) {
+    Gdx.gl.glEnable(GL20.GL_ARRAY_BUFFER_BINDING);
+    debugRenderer.begin(ShapeRenderer.ShapeType.Line)
+    debugRenderer.color = Color.RED
+    debugRenderer.line(start, end)
+    debugRenderer.end()
+    Gdx.gl.glDisable(GL20.GL_BLEND);
 }
