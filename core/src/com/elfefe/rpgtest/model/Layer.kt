@@ -1,10 +1,8 @@
 package com.elfefe.rpgtest.model
 
-import com.badlogic.gdx.math.Rectangle
-import com.badlogic.gdx.math.Shape2D
-
-
 data class Layer(
-        var index: Int,
-        var collider: Rectangle
+        var order: Int,
+        var physic: ArrayList<Int>,
+        var triggerBounds: HashMap<Int, Rectangle>,
+        var collisionBounds: ArrayList<Rectangle>
 )

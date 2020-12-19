@@ -6,15 +6,11 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
-import com.elfefe.rpgtest.RpgTest
 import com.elfefe.rpgtest.model.Entity
 import com.elfefe.rpgtest.model.Layer
 import com.elfefe.rpgtest.model.Personnage
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
-import java.lang.Float.max
-import java.lang.Float.min
 import kotlin.math.abs
-import kotlin.math.round
 
 fun Batch.draw (personnage: Personnage, stateTime: Float, width: Int = personnage.size, height: Int = personnage.size) {
     draw(personnage.currentFrame(stateTime), personnage.position.x, personnage.position.y, width.toFloat(), height.toFloat())
@@ -32,12 +28,17 @@ fun ArrayList<Entity>.addEntities(vararg entity: Entity) {
 
 fun Vector2.set(entity: Entity, x: Float, y: Float) {
     entity.setPosition(x, y)
+    entity.layer.triggerBounds.forEach { (i, rect) ->
+        rect.setPosition(x + rect.offset.x, y + rect.offset.y)
+    }
+    entity.layer.collisionBounds.forEach { rect ->
+        rect.setPosition(x + rect.offset.x, y + rect.offset.y)
+    }
     set(x, y)
 }
 
 fun Vector2.set(entity: Entity, position: Vector2) {
-    entity.setPosition(position.x, position.y)
-    set(position.x, position.y)
+    set(entity, position.x, position.y)
 }
 
 val Rectangle.segments: ArrayList<LineSegment>
@@ -50,17 +51,11 @@ val Rectangle.segments: ArrayList<LineSegment>
 
 val debugRenderer by lazy { ShapeRenderer() }
 
-fun drawDebugLine(start: Vector2, end: Vector2) {
+fun drawDebugLine(start: Vector2, end: Vector2, color: Color = Color.RED) {
     Gdx.gl.glEnable(GL20.GL_ARRAY_BUFFER_BINDING)
     debugRenderer.begin(ShapeRenderer.ShapeType.Line)
-    debugRenderer.color = Color.RED
+    debugRenderer.color = color
     debugRenderer.line(start, end)
     debugRenderer.end()
     Gdx.gl.glDisable(GL20.GL_BLEND)
-}
-
-fun ArrayList<Layer>.contains(index: Int): Boolean {
-    var isContained = false
-    forEach { if (it.index == index) isContained = true }
-    return isContained
 }
