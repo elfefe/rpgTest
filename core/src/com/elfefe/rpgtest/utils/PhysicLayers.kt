@@ -10,5 +10,5 @@ object PhysicLayers {
     val ENTITY: Layer
         get() = Layer(2, arrayListOf(0), hashMapOf(), arrayListOf())
     val PLAYER:Layer
-        get() = Layer(1, arrayListOf(1), hashMapOf(), arrayListOf())
+        get() = Layer(10, arrayListOf(1), hashMapOf(), arrayListOf())
 }

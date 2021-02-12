@@ -24,7 +24,11 @@ fun normalizeDirection(distance: Vector2): Vector2 {
 }
 
 fun clampToFarthest(position: Float, lastPosition: Float, direction: Float): Float {
-    return  if (min(abs(lastPosition), abs(direction)) == lastPosition)
+    return  if (
+//            if (direction / abs(direction) == 1f)
+                min(abs(lastPosition), abs(direction)) == lastPosition
+//            else max(abs(lastPosition), abs(direction)) == lastPosition
+    )
         MathUtils.clamp(position,  lastPosition, direction)
     else MathUtils.clamp(position,  direction, lastPosition)
 }

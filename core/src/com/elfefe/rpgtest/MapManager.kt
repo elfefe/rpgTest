@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -110,6 +111,12 @@ class MapManager {
                         isTouching = true
                     }
                 }
+
+                entity.interactibles.forEach {
+                    if (player.collider.overlaps(entity.layer.triggerBounds[it.id]) && it.asInteracted) {
+                        it.interaction()
+                    }
+                }
                 player.isBlocked = isTouching
             }
         }
@@ -134,7 +141,7 @@ class MapManager {
             }
         }
         entities.sortBy { it.layer.order }
-        var order = 0
+
         entities.forEach {
             it.draw(batch)
         }
@@ -147,6 +154,10 @@ class MapManager {
         if (Gdx.input.isTouched) {
             clickPosition.x = mousePosition.x
             clickPosition.y = mousePosition.y
+
+            entities.forEach {
+                it.interact(clickPosition)
+            }
         }
     }
 

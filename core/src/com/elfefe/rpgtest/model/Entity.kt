@@ -13,10 +13,17 @@ import javax.swing.text.Position
 abstract class Entity(texturePath: String): Sprite(Texture(texturePath)) {
     abstract var layer: Layer
     abstract val position: Vector2
+    abstract var interactibles: List<Interactible>
 
     val id: Int = ids
     val collider: Rectangle
         get() = boundingRectangle
 
     fun dispose() = texture.dispose()
+
+    open fun interact(mousePosition: Vector2) {
+        interactibles.forEach {
+            it.asInteracted = layer.triggerBounds[it.id]!!.contains(mousePosition)
+        }
+    }
 }

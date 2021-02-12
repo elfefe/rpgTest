@@ -13,7 +13,6 @@ import com.elfefe.rpgtest.RpgTest
 import com.elfefe.rpgtest.utils.*
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import com.elfefe.rpgtest.utils.raycasting.RayCast
-import sun.audio.AudioPlayer.player
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.min
@@ -22,6 +21,7 @@ import kotlin.math.sin
 open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     override var layer = PhysicLayers.ENTITY
     final override val position = Vector2(0f, 0f)
+    override var interactibles: List<Interactible> = listOf()
 
     var animation: Animation<TextureRegion>
     var frames: Array<TextureRegion>
@@ -57,7 +57,7 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
         return position == lastPosition
     }
 
-    fun move(direction: Vector2, segments: ArrayList<LineSegment>) {
+    private fun move(direction: Vector2, segments: ArrayList<LineSegment>) {
         val dir = direction.cpy().apply {
             x -= size / 2
             y -= size / 2
@@ -70,6 +70,8 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
                 lastPosition,
                 dir
         )
+
+        println("Normalized $normalizeDirection, Pos $pos, Direction $dir, Position $position")
 
         val rayPos = pos.cpy().apply {
             x += size / 2
@@ -89,6 +91,6 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     }
 
     fun currentFrame(stateTime: Float): TextureRegion? {
-        return animation.getKeyFrame(stateTime, true).apply { setSize(-width , height) }
+        return animation.getKeyFrame(stateTime, true)
     }
 }
