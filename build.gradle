@@ -10,7 +10,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.0-beta03'
+        classpath 'com.android.tools.build:gradle:7.0.0-alpha05'
         classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.11'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 
@@ -37,6 +37,7 @@ allprojects {
         google()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url 'https://repo.spongepowered.org/maven/' }
     }
 }
 
@@ -126,5 +127,6 @@ project(":core") {
         api "com.underwaterapps.overlap2druntime:overlap2d-runtime-libgdx:0.1.0"
         api "com.esotericsoftware.spine:spine-libgdx:3.6.53.1"
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        api "org.spongepowered:noise:2.0.0-SNAPSHOT"
     }
 }

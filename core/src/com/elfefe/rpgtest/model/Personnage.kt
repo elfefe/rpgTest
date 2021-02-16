@@ -1,22 +1,16 @@
 package com.elfefe.rpgtest.model
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.profiling.GLProfiler
-import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Vector2
-import com.elfefe.rpgtest.MapManager
-import com.elfefe.rpgtest.RpgTest
+import com.elfefe.rpgtest.GameManager
 import com.elfefe.rpgtest.utils.*
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import com.elfefe.rpgtest.utils.raycasting.RayCast
 import kotlin.math.abs
-import kotlin.math.cos
 import kotlin.math.min
-import kotlin.math.sin
 
 open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     override var layer = PhysicLayers.ENTITY
@@ -49,7 +43,7 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
     }
 
     override fun draw(batch: Batch) {
-        move(clickPosition, MapManager.colliders())
+        move(clickPosition, GameManager.colliders())
         batch.draw(this, stateTime)
     }
 
@@ -71,7 +65,7 @@ open class Personnage(texturePath: String, var size: Int): Entity(texturePath) {
                 dir
         )
 
-        println("Normalized $normalizeDirection, Pos $pos, Direction $dir, Position $position")
+//        println("Normalized $normalizeDirection, Pos $pos, Direction $dir, Position $position")
 
         val rayPos = pos.cpy().apply {
             x += size / 2

@@ -3,6 +3,7 @@ package com.elfefe.rpgtest
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
@@ -18,7 +19,7 @@ import net.gpdev.autotile.AutoTiler
 import java.util.ArrayList
 import kotlin.math.max
 
-class MapManager {
+class GameManager {
     private var batch: SpriteBatch = SpriteBatch()
 
     private var viewport: Viewport
@@ -29,6 +30,10 @@ class MapManager {
     private var circle: Pixmap = Pixmap(8, 8, Pixmap.Format.RGBA8888)
     private var circleTexture: Texture
 
+    private var mapProcedural: Pixmap = Pixmap(500, 500, Pixmap.Format.RGBA8888)
+    val generated = generate(mapProcedural.width, mapProcedural.height)
+    private lateinit var shapeRenderer: ShapeRenderer
+
     private lateinit var mousePosition: Vector3
 
     private val player: Player
@@ -38,6 +43,8 @@ class MapManager {
         circle.setColor(Color.BLACK)
         circle.fillCircle(4, 4, 2)
         circleTexture = Texture(circle)
+
+        shapeRenderer = ShapeRenderer()
 
         autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
         map = autoTiler.generateMap()
@@ -100,6 +107,15 @@ class MapManager {
         player.collider.segments.forEach {
             drawDebugLine(it.A, it.B, Color.WHITE)
         }
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Point)
+        for (x in 0 until mapProcedural.width)
+            for (y in 0 until mapProcedural.height)
+                shapeRenderer.run {
+                    point(x.toFloat(), y.toFloat(), 0f)
+                    setColor(generated[x][y], generated[x][y], generated[x][y], 1f)
+                }
+        shapeRenderer.end()
     }
 
     private fun checkCollisions() {
