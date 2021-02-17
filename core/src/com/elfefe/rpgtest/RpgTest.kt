@@ -1,6 +1,7 @@
 package com.elfefe.rpgtest
 
 import com.badlogic.gdx.ApplicationAdapter
+import com.badlogic.gdx.jnigen.NativeCodeGenerator
 
 
 class RpgTest : ApplicationAdapter() {

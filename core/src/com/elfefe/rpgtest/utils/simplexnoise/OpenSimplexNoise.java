@@ -1,4 +1,4 @@
-package com.elfefe.rpgtest.utils;/*
+package com.elfefe.rpgtest.utils.simplexnoise;/*
  * 2014 OpenSimplex Noise in Java.
  * by Kurt Spencer
  * 

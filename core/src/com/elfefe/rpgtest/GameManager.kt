@@ -16,6 +16,7 @@ import com.elfefe.rpgtest.model.Player
 import com.elfefe.rpgtest.utils.*
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import net.gpdev.autotile.AutoTiler
+import java.lang.Float.min
 import java.util.ArrayList
 import kotlin.math.max
 
@@ -30,9 +31,10 @@ class GameManager {
     private var circle: Pixmap = Pixmap(8, 8, Pixmap.Format.RGBA8888)
     private var circleTexture: Texture
 
-    private var mapProcedural: Pixmap = Pixmap(500, 500, Pixmap.Format.RGBA8888)
+    private var mapProcedural: Pixmap = Pixmap(400, 400, Pixmap.Format.RGBA8888)
     val generated = generate(mapProcedural.width, mapProcedural.height)
-    private lateinit var shapeRenderer: ShapeRenderer
+//    val generatedOpen = generateOpen(mapProcedural.width, mapProcedural.height)
+    private val shapeRenderer = ShapeRenderer()
 
     private lateinit var mousePosition: Vector3
 
@@ -44,8 +46,6 @@ class GameManager {
         circle.fillCircle(4, 4, 2)
         circleTexture = Texture(circle)
 
-        shapeRenderer = ShapeRenderer()
-
         autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
         map = autoTiler.generateMap()
 
@@ -53,7 +53,7 @@ class GameManager {
         viewport = FitViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(), camera)
 
         // Setup map renderer
-        val unitScale = 1f / max(MAP_WIDTH / Gdx.graphics.width, MAP_HEIGHT / Gdx.graphics.height)
+//        val unitScale = 1f / max(MAP_WIDTH / Gdx.graphics.width, MAP_HEIGHT / Gdx.graphics.height)
         renderer = OrthogonalTiledMapRenderer(map, batch)
 
         player = Player("black_wizard_walking.png", 64)
@@ -108,13 +108,21 @@ class GameManager {
             drawDebugLine(it.A, it.B, Color.WHITE)
         }
 
+        var bigger = 0f
+        var smaller = 0f
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Point)
         for (x in 0 until mapProcedural.width)
-            for (y in 0 until mapProcedural.height)
+            for (y in 0 until mapProcedural.height) {
+                val c = generated[x][y] * 2
                 shapeRenderer.run {
                     point(x.toFloat(), y.toFloat(), 0f)
-                    setColor(generated[x][y], generated[x][y], generated[x][y], 1f)
+                    setColor(c, c, c, 1f)
                 }
+                bigger = max(bigger, c)
+                smaller = min(smaller, c)
+            }
+        println("$bigger, $smaller")
         shapeRenderer.end()
     }
 
@@ -127,7 +135,6 @@ class GameManager {
                         isTouching = true
                     }
                 }
-
                 entity.interactibles.forEach {
                     if (player.collider.overlaps(entity.layer.triggerBounds[it.id]) && it.asInteracted) {
                         it.interaction()
@@ -141,6 +148,7 @@ class GameManager {
     fun dispose() {
         batch.dispose()
         player.dispose()
+        shapeRenderer.dispose()
     }
 
     private fun drawBackground() {
