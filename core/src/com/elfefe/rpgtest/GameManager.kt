@@ -14,6 +14,7 @@ import com.elfefe.rpgtest.model.Entity
 import com.elfefe.rpgtest.model.House
 import com.elfefe.rpgtest.model.Player
 import com.elfefe.rpgtest.utils.*
+import com.elfefe.rpgtest.utils.MapNoise.generateWhiteNoise
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import net.gpdev.autotile.AutoTiler
 import java.lang.Float.min
@@ -32,8 +33,7 @@ class GameManager {
     private var circleTexture: Texture
 
     private var mapProcedural: Pixmap = Pixmap(400, 400, Pixmap.Format.RGBA8888)
-    val generated = generate(mapProcedural.width, mapProcedural.height)
-//    val generatedOpen = generateOpen(mapProcedural.width, mapProcedural.height)
+    val generated = MapNoise.generatePerlinNoise(mapProcedural.width, mapProcedural.height, 5)
     private val shapeRenderer = ShapeRenderer()
 
     private lateinit var mousePosition: Vector3
@@ -114,10 +114,10 @@ class GameManager {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Point)
         for (x in 0 until mapProcedural.width)
             for (y in 0 until mapProcedural.height) {
-                val c = generated[x][y] * 2
+                val c = generated[x][y]
                 shapeRenderer.run {
                     point(x.toFloat(), y.toFloat(), 0f)
-                    setColor(c, c, c, 1f)
+                    color = if (c > 0) Color.GREEN else Color.BLUE
                 }
                 bigger = max(bigger, c)
                 smaller = min(smaller, c)

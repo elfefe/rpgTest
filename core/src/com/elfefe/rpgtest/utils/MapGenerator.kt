@@ -20,8 +20,9 @@ fun generate(width: Int, height: Int): Array<Array<Float>> {
         val x = i - (y * height)
 //        val noise = SimplexNoise.noise(x / 150.0, y / 150.0).toFloat()
 //        val noise = com.elfefe.rpgtest.utils.simplexnoise.fromc.SimplexNoise.noise(x / 100f, y / 100f)
-        val noise = OpenSimplexNoise(1).eval(x / 100f, y / 100f)
-        array[x][y] = (noise / 2) + 0.5f
+//        val noise = OpenSimplexNoise(1).eval(x / 100f, y / 100f)
+        val noise = ImprovedNoise.noise(x / 2.0, y / 2.0, 1.0)
+        array[x][y] = noise.toFloat()
     }
     return array
 }
