@@ -6,11 +6,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.elfefe.rpgtest.model.Entity
 import com.elfefe.rpgtest.model.House
 import com.elfefe.rpgtest.model.Player
 import com.elfefe.rpgtest.utils.*
@@ -33,7 +31,7 @@ class GameManager {
     private var circleTexture: Texture
 
     private var mapProcedural: Pixmap = Pixmap(400, 400, Pixmap.Format.RGBA8888)
-    val generated = generatePerlinNoise(mapProcedural.width, mapProcedural.height, 7, 1)
+    val generated = generatePerlinNoise(mapProcedural.width, mapProcedural.height, 7, 2)
     private val shapeRenderer = ShapeRenderer()
 
     private lateinit var mousePosition: Vector3
@@ -112,16 +110,17 @@ class GameManager {
         var smaller = 0f
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Point)
-        for (x in 0 until mapProcedural.width)
-            for (y in 0 until mapProcedural.height) {
-                val c = generated[x][y]
-                shapeRenderer.run {
-                    point(x.toFloat(), y.toFloat(), 0f)
-                    color = if (c > 0) Color.GREEN else Color.BLUE
-                }
-                bigger = max(bigger, c)
-                smaller = min(smaller, c)
+        for (i in 0 until mapProcedural.width * mapProcedural.height) {
+            val y = fastFloor(i / mapProcedural.height / 1.0)
+            val x = i - (y * mapProcedural.height)
+            val c = generated[x][y]
+            shapeRenderer.run {
+                point(x.toFloat(), y.toFloat(), 0f)
+                color = c.color
             }
+            bigger = max(bigger, c.indice)
+            smaller = min(smaller, c.indice)
+        }
         println("$bigger, $smaller")
         shapeRenderer.end()
     }

@@ -1,5 +1,6 @@
 package com.elfefe.rpgtest.utils
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import java.lang.Float.min
@@ -118,7 +119,7 @@ object MapNoise {
         return generateSmoothNoise(generateWhiteNoise(width, height, seed), 1)
     }
 
-    fun generatePerlinNoise(width: Int, height: Int, octaveCount: Int, seed: Int = 0): Array<Array<Float>> {
+    fun generatePerlinNoise(width: Int, height: Int, octaveCount: Int, seed: Int = 0): Array<Array<MapPixel>> {
         val smoothNoise: Array<Array<Array<Float>>> = Array(octaveCount) { Array(0) { Array(0) { 0f } } }
 
         val persistance = 0.5f
@@ -126,7 +127,7 @@ object MapNoise {
         for (i in 0 until octaveCount)
             smoothNoise[i] = generateSmoothNoise(generateWhiteNoise(width, height, seed), i)
 
-        val perlinNoise = Array(width) { Array(height) { 0f } }
+        val perlinNoise = Array(width) { Array(height) { MapPixel(0f, Color.CLEAR) } }
         var amplitude = 1f
         var totalAmplitude = 0f
 
@@ -137,18 +138,30 @@ object MapNoise {
             for (i in 0 until width * height) {
                 val y = fastFloor(i / height / 1.0)
                 val x = i - (y * height)
-                perlinNoise[x][y] += smoothNoise[octave][x][y] * amplitude
+                perlinNoise[x][y].indice += smoothNoise[octave][x][y] * amplitude
             }
         }
 
         for (i in 0 until width * height) {
             val y = fastFloor(i / height / 1.0)
             val x = i - (y * height)
-            perlinNoise[x][y] /= totalAmplitude
+            perlinNoise[x][y].run {
+                indice /= totalAmplitude
+                color = if (indice > 0) when {
+                    indice > 0.45f -> Color.WHITE
+                    else -> Color.GREEN.apply {
+                        g = 0.5f + (abs(indice) / 2)
+                    }
+                }  else Color.BLUE.apply {
+                    b = 0.5f + (abs(indice) / 2)
+                }
+            }
         }
 
         return perlinNoise
     }
 
     private fun interpolate(x0: Float, x1: Float, alpha: Float) = x0 * (1 - alpha) + alpha * x1
+
+    data class MapPixel(var indice: Float, var color: Color)
 }
