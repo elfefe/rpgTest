@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.elfefe.rpgtest.model.House
 import com.elfefe.rpgtest.model.Player
 import com.elfefe.rpgtest.utils.*
-import com.elfefe.rpgtest.utils.MapNoise.generatePerlinNoise
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import net.gpdev.autotile.AutoTiler
 import java.lang.Float.min
@@ -23,16 +22,14 @@ class GameManager {
     private var batch: SpriteBatch = SpriteBatch()
 
     private var viewport: Viewport
-    private var renderer: OrthogonalTiledMapRenderer
+//    private var renderer: OrthogonalTiledMapRenderer
     private var autoTiler: AutoTiler
-    private var map: TiledMap
+//    private var map: TiledMap
 
     private var circle: Pixmap = Pixmap(8, 8, Pixmap.Format.RGBA8888)
     private var circleTexture: Texture
 
-    private var mapProcedural: Pixmap = Pixmap(400, 400, Pixmap.Format.RGBA8888)
-    val generated = generatePerlinNoise(mapProcedural.width, mapProcedural.height, 7, 2)
-    private val shapeRenderer = ShapeRenderer()
+    private val mapGenerator = MapGenerator()
 
     private lateinit var mousePosition: Vector3
 
@@ -45,14 +42,15 @@ class GameManager {
         circleTexture = Texture(circle)
 
         autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
-        map = autoTiler.generateMap()
+//        map = autoTiler.generateMap()
 
         // Setup camera
         viewport = FitViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(), camera)
 
+
         // Setup map renderer
 //        val unitScale = 1f / max(MAP_WIDTH / Gdx.graphics.width, MAP_HEIGHT / Gdx.graphics.height)
-        renderer = OrthogonalTiledMapRenderer(map, batch)
+//        renderer = OrthographicCamera(batch)
 
         player = Player("black_wizard_walking.png", 64)
         house = House("house_1.png")
@@ -68,7 +66,7 @@ class GameManager {
         camera.update()
 
         autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
-        map = autoTiler.generateMap()
+//        map = autoTiler.generateMap()
     }
 
     fun render() {
@@ -78,8 +76,10 @@ class GameManager {
 
         // Render map
         viewport.apply(true)
-        renderer.setView(camera)
-        renderer.render()
+//        renderer.setView(camera)
+//        renderer.render()
+
+        mapGenerator.draw()
 
         checkMouseEvent()
 
@@ -92,37 +92,19 @@ class GameManager {
         entities.forEach { entity ->
             entity.layer.triggerBounds.forEach { (_, rect) ->
                 rect.segments.forEach { lineSegment ->
-                    drawDebugLine(lineSegment.A, lineSegment.B, Color.GREEN)
+//                    drawDebugLine(lineSegment.A, lineSegment.B, Color.GREEN)
                 }
             }
             entity.layer.collisionBounds.forEach { rect ->
                 rect.segments.forEach { lineSegment ->
-                    drawDebugLine(lineSegment.A, lineSegment.B, Color.YELLOW)
+//                    drawDebugLine(lineSegment.A, lineSegment.B, Color.YELLOW)
                 }
             }
         }
 
         player.collider.segments.forEach {
-            drawDebugLine(it.A, it.B, Color.WHITE)
+//            drawDebugLine(it.A, it.B, Color.WHITE)
         }
-
-        var bigger = 0f
-        var smaller = 0f
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Point)
-        for (i in 0 until mapProcedural.width * mapProcedural.height) {
-            val y = fastFloor(i / mapProcedural.height / 1.0)
-            val x = i - (y * mapProcedural.height)
-            val c = generated[x][y]
-            shapeRenderer.run {
-                point(x.toFloat(), y.toFloat(), 0f)
-                color = c.color
-            }
-            bigger = max(bigger, c.indice)
-            smaller = min(smaller, c.indice)
-        }
-        println("$bigger, $smaller")
-        shapeRenderer.end()
     }
 
     private fun checkCollisions() {
@@ -147,7 +129,7 @@ class GameManager {
     fun dispose() {
         batch.dispose()
         player.dispose()
-        shapeRenderer.dispose()
+        mapGenerator.dispose()
     }
 
     private fun drawBackground() {
@@ -166,7 +148,8 @@ class GameManager {
         entities.sortBy { it.layer.order }
 
         entities.forEach {
-            it.draw(batch)
+//            TODO: Remove to show entities
+//            it.draw(batch)
         }
     }
 

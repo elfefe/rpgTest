@@ -1,9 +1,9 @@
 package com.elfefe.rpgtest.utils
 
-import com.elfefe.rpgtest.utils.simplexnoise.OpenSimplex2S
-import com.elfefe.rpgtest.utils.simplexnoise.OpenSimplexNoise
-import com.elfefe.rpgtest.utils.simplexnoise.SimplexNoise
-import kotlin.math.floor
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.elfefe.rpgtest.utils.noise.MapNoise
 
 
 /***
@@ -13,16 +13,26 @@ import kotlin.math.floor
  * @param height The array height
  *
  * *************** @author Donelfefe *******************/
-fun generate(width: Int, height: Int): Array<Array<Float>> {
-    val array = Array(width) {Array(height) {0f} }
-    for (i in 0 until width * height) {
-        val y = floor(i / height.toFloat()).toInt()
-        val x = i - (y * height)
-//        val noise = SimplexNoise.noise(x / 150.0, y / 150.0).toFloat()
-//        val noise = com.elfefe.rpgtest.utils.simplexnoise.fromc.SimplexNoise.noise(x / 100f, y / 100f)
-//        val noise = OpenSimplexNoise(1).eval(x / 100f, y / 100f)
-//        val noise = ImprovedNoise.noise(x / 2.0, y / 2.0, 1.0)
-//        array[x][y] = noise.toFloat()
+
+class MapGenerator {
+    val shapeRenderer = ShapeRenderer()
+
+    var mapProcedural = Pixmap(Gdx.graphics.width, Gdx.graphics.height, Pixmap.Format.RGBA8888)
+    var generated = MapNoise.generatePerlinNoise(mapProcedural.width, mapProcedural.height, 8, 24)
+
+    fun draw() {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Point)
+        for (i in 0 until mapProcedural.width * mapProcedural.height) {
+            val x = fastFloor(i / mapProcedural.height / 1.0)
+            val y = i - (x * mapProcedural.height)
+            val c = generated[x][y]
+            shapeRenderer.run {
+                point(x.toFloat(), y.toFloat(), 0f)
+                color = c.color
+            }
+        }
+        shapeRenderer.end()
     }
-    return array
+
+    fun dispose() = shapeRenderer.dispose()
 }
