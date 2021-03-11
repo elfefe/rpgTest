@@ -10,8 +10,11 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileSet;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
+import com.elfefe.rpgtest.utils.ColorsKt;
+import com.elfefe.rpgtest.utils.noise.MapNoise;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +87,7 @@ public class AutoTiler {
     private TiledMapTileSet tileSet;
     private TiledMap map;
     private TiledMapTileLayer mapLayer;
+    private MapNoise.MapPixel[][] mapPixels;
 
     /**
      * C-tor
@@ -115,12 +119,15 @@ public class AutoTiler {
      *
      * @return The generated TileMap
      */
-    public TiledMap generateMap() {
+    public TiledMap generateMap(MapNoise.MapPixel[][] noiseMap) {
+        mapPixels = noiseMap;
         // Iterate on map cells from bottom-left to top-right
+//        int xCoef = mapWidth / noiseMap.length;
+//        int yCoef = mapHeight / noiseMap[0].length;
         for (int row = 0; row < mapHeight; row++) {
             for (int col = 0; col < mapWidth; col++) {
                 // Pick next tile
-                final int tileId = pickTile(col, row);
+                final int tileId = pickTile(col, row, noiseMap[col][row]);
                 final TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
                 cell.setTile(tileSet.getTile(tileId));
                 mapLayer.setCell(col, row, cell);
@@ -137,7 +144,7 @@ public class AutoTiler {
      * @param row Map row
      * @return The ID of the picked tile in the tileset
      */
-    private int pickTile(final int col, final int row) {
+    private int pickTile(final int col, final int row, final MapNoise.MapPixel mapPixel) {
         // Init all match mask elements to "dont-care"
         final byte[] matchMask = new byte[]{MATCH_ANY, MATCH_ANY, MATCH_ANY, MATCH_ANY};
 
@@ -147,16 +154,40 @@ public class AutoTiler {
                 TOP_LEFT.id(), TOP_RIGHT.id(),
                 BOTTOM_LEFT.id(), BOTTOM_RIGHT.id());
 
+        System.out.println("Mask: " + Arrays.toString(matchMask));
+
         // Update match mask according to bottom tile corners
         updateMatchMaskForTile(matchMask,
                 col, row - 1,
                 BOTTOM_LEFT.id(), TOP_LEFT.id(),
                 BOTTOM_RIGHT.id(), TOP_RIGHT.id());
 
+        // Update match mask according to right tile corners
+        updateMatchMaskForTileType(matchMask,
+                col + 1, row,
+                TOP_RIGHT.id(), TOP_LEFT.id(),
+                BOTTOM_RIGHT.id(), BOTTOM_LEFT.id());
+
+        // Update match mask according to top tile corners
+        updateMatchMaskForTileType(matchMask,
+                col, row + 1,
+                TOP_LEFT.id(), BOTTOM_LEFT.id(),
+                TOP_RIGHT.id(), BOTTOM_RIGHT.id());
+
+
         // Handle "special case" for terrain types without transition tiles
         final int tileId = getTileId(col + 1, row - 1);
         if (tileId >= 0) {
-            final byte tileCorner = getTerrainCodes(tileId)[TOP_RIGHT.id()];
+//            final byte tileCorner = getTerrainCodes(tileId)[TOP_RIGHT.id()];
+//            System.out.println("Tile corner: " + tileCorner);
+            byte tileCorner = 0;
+            if (mapPixel.getColor() == MapNoise.INSTANCE.getOcean()) {
+                tileCorner = 1;
+            } else if (mapPixel.getColor() == MapNoise.INSTANCE.getForest()) {
+                tileCorner = 2;
+            } else if (mapPixel.getColor() == MapNoise.INSTANCE.getGlace()) {
+                tileCorner = 1;
+            }
             final byte maskCorner = matchMask[TOP_LEFT.id()];
             if (maskCorner != tileCorner) {
                 final TreeSet<Byte> validTransitions = terrainTypes.get(tileCorner).getTransitions();
@@ -168,6 +199,8 @@ public class AutoTiler {
 
         // Find all tiles that match
         final List<Integer> matchingTiles = findMatchingTiles(matchMask);
+
+        System.out.println("Matching tiles: " + matchingTiles.size());
 
         // Pick one of the matching tiles
         final int selectedTile = random.nextInt(matchingTiles.size());
@@ -196,6 +229,30 @@ public class AutoTiler {
         if (tileId >= 0) {
             // Extract tile bit codes
             final byte[] tileCodes = getTerrainCodes(tileId);
+
+            // Update match mask
+            mask[mask_corner0] = tileCodes[tile_corner0];
+            mask[mask_corner1] = tileCodes[tile_corner1];
+        }
+    }
+
+    private void updateMatchMaskForTileType(final byte[] mask,
+                                        final int col, final int row,
+                                        final int mask_corner0, final int tile_corner0,
+                                        final int mask_corner1, final int tile_corner1) {
+        if (mapPixels.length > col && mapPixels[0].length > row) {
+            final MapNoise.MapPixel zone = mapPixels[col][row];
+            int terrainType = 0;
+            if (zone.getColor() == MapNoise.INSTANCE.getOcean()) {
+                terrainType = 1;
+            } else if (zone.getColor() == MapNoise.INSTANCE.getForest()) {
+                terrainType = 3;
+            } else if (zone.getColor() == MapNoise.INSTANCE.getGlace()) {
+                terrainType = 1;
+            }
+
+            // Extract tile bit codes
+            final byte[] tileCodes = getTerrainCodes(tileRowTerrains.get(terrainType).get(random.nextInt(tileRowTerrains.get(0).size())));
 
             // Update match mask
             mask[mask_corner0] = tileCodes[tile_corner0];
@@ -241,6 +298,8 @@ public class AutoTiler {
         if (col < 0 || row < 0 || col >= mapWidth || row >= mapHeight) {
             return -1;
         }
+
+        System.out.println("Col: " + col + "/" + mapWidth + ", row: " + row + "/" + mapHeight);
 
         return mapLayer.getCell(col, row).getTile().getId();
     }

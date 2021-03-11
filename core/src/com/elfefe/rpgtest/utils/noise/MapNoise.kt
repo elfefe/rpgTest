@@ -10,6 +10,13 @@ import kotlin.random.Random
 
 
 object MapNoise {
+    var ocean = Color.BLUE
+    private set
+    var forest = Color.GREEN
+        private set
+    var glace = Color.CYAN
+        private set
+
     fun generateWhiteNoise(width: Int, height: Int, seed: Int = 0): Array<Array<Float>> {
         val random = Random(seed) //Seed to 0 for testing
         val noise = Array(width) { Array(height) { 0f } };
@@ -115,9 +122,9 @@ object MapNoise {
     }
 
     private fun MapPixel.mappingColors(percent: Float, sand: Float) {
-        val ocean = Color(0f, 0.2f + indice, 0.63f, 1f)
-        val forest = Color(0f, 0.75f - indice / 2, 0f, 1f)
-        val glace = Color(0f, 0.78f, 1f, 1f)
+        ocean = Color(0f, 0.2f + indice, 0.63f, 1f)
+        forest = Color(0f, 0.75f - indice / 2, 0f, 1f)
+        glace = Color(0f, 0.78f, 1f, 1f)
         val neige = 0.3f * log10(percent) - 0.1f
         color =
                 if (indice > neige || neige.isNaN()) Color.WHITE

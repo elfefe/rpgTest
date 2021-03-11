@@ -1,11 +1,12 @@
 package com.elfefe.rpgtest
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -14,17 +15,15 @@ import com.elfefe.rpgtest.model.Player
 import com.elfefe.rpgtest.utils.*
 import com.elfefe.rpgtest.utils.raycasting.LineSegment
 import net.gpdev.autotile.AutoTiler
-import java.lang.Float.min
 import java.util.ArrayList
-import kotlin.math.max
 
 class GameManager {
     private var batch: SpriteBatch = SpriteBatch()
 
     private var viewport: Viewport
-//    private var renderer: OrthogonalTiledMapRenderer
+    private var renderer: OrthogonalTiledMapRenderer
     private var autoTiler: AutoTiler
-//    private var map: TiledMap
+    private var map: TiledMap
 
     private var circle: Pixmap = Pixmap(8, 8, Pixmap.Format.RGBA8888)
     private var circleTexture: Texture
@@ -32,6 +31,7 @@ class GameManager {
     private val mapGenerator = MapGenerator()
 
     private lateinit var mousePosition: Vector3
+    private val cameraPosition = Vector2()
 
     private val player: Player
     private val house: House
@@ -41,16 +41,17 @@ class GameManager {
         circle.fillCircle(4, 4, 2)
         circleTexture = Texture(circle)
 
-        autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
-//        map = autoTiler.generateMap()
-
         // Setup camera
-        viewport = FitViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(), camera)
+        viewport = FitViewport(Gdx.graphics.width.toFloat() * 10, Gdx.graphics.height.toFloat() * 10, camera)
+
+        // Generate world map
+        autoTiler = AutoTiler(Gdx.graphics.width, Gdx.graphics.height, Gdx.files.internal("tileset.json"))
+        map = autoTiler.generateMap(mapGenerator.generated)
 
 
         // Setup map renderer
 //        val unitScale = 1f / max(MAP_WIDTH / Gdx.graphics.width, MAP_HEIGHT / Gdx.graphics.height)
-//        renderer = OrthographicCamera(batch)
+        renderer = OrthogonalTiledMapRenderer(map, batch)
 
         player = Player("black_wizard_walking.png", 64)
         house = House("house_1.png")
@@ -62,10 +63,10 @@ class GameManager {
     }
 
     fun recalculate(width: Int, height: Int) {
-        viewport.update(width, height, true)
+        viewport.update(width, height, false)
         camera.update()
 
-        autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
+//        autoTiler = AutoTiler(MAP_WIDTH, MAP_HEIGHT, Gdx.files.internal("tileset.json"))
 //        map = autoTiler.generateMap()
     }
 
@@ -75,11 +76,13 @@ class GameManager {
         stateTime += Gdx.graphics.deltaTime
 
         // Render map
-        viewport.apply(true)
-//        renderer.setView(camera)
-//        renderer.render()
+        cameraPosition.set(Keys.direction(CAMERA_MOVEMENT_SPEED))
+        camera.translate(cameraPosition)
+        viewport.apply(false)
+        renderer.setView(camera)
+        renderer.render()
 
-        mapGenerator.draw()
+//        mapGenerator.draw()
 
         checkMouseEvent()
 
@@ -149,7 +152,7 @@ class GameManager {
 
         entities.forEach {
 //            TODO: Remove to show entities
-//            it.draw(batch)
+            it.draw(batch)
         }
     }
 
@@ -168,8 +171,12 @@ class GameManager {
     }
 
     companion object {
-        private const val MAP_WIDTH = 20
-        private const val MAP_HEIGHT = 20
+        private val MAP_WIDTH = GameConfig.config.get(GameConfig.MAP).get(GameConfig.WIDTH).asInt()
+        private val MAP_HEIGHT = GameConfig.config.get(GameConfig.MAP).get(GameConfig.HEIGHT).asInt()
+        private val CAMERA_WIDTH = GameConfig.config.get(GameConfig.CAMERA).get(GameConfig.WIDTH).asInt()
+        private val CAMERA_HEIGHT = GameConfig.config.get(GameConfig.CAMERA).get(GameConfig.HEIGHT).asInt()
+
+        const val CAMERA_MOVEMENT_SPEED = 20
 
         val camera = OrthographicCamera()
 

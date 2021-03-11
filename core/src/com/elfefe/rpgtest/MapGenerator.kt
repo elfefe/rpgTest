@@ -1,8 +1,9 @@
-package com.elfefe.rpgtest.utils
+package com.elfefe.rpgtest
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.elfefe.rpgtest.utils.fastFloor
 import com.elfefe.rpgtest.utils.noise.MapNoise
 
 

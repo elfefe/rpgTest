@@ -1,0 +1,10 @@
+{
+  "Map": {
+    "Width": 36000,
+    "Height": 28000
+  },
+  "Camera": {
+    "Width": 16,
+    "Height": 12
+  }
+}
