@@ -20,6 +20,7 @@ import java.util.ArrayList
 class GameManager {
     private var batch: SpriteBatch = SpriteBatch()
 
+    val camera = OrthographicCamera()
     private var viewport: Viewport
     private var renderer: OrthogonalTiledMapRenderer
     private var autoTiler: AutoTiler
@@ -42,7 +43,17 @@ class GameManager {
         circleTexture = Texture(circle)
 
         // Setup camera
-        viewport = FitViewport(Gdx.graphics.width.toFloat() * 10, Gdx.graphics.height.toFloat() * 10, camera)
+        viewport = FitViewport(
+            Gdx.graphics.width.toFloat() * ZOOM_CAMERA,
+            Gdx.graphics.height.toFloat() * ZOOM_CAMERA, camera
+        )
+
+        Mouse.doOnScroll = {
+            viewport.setWorldSize(
+                viewport.worldWidth + Mouse.scroll * ZOOM_SPEED,
+                viewport.worldHeight + Mouse.scroll * ZOOM_SPEED
+            )
+        }
 
         // Generate world map
         autoTiler = AutoTiler(Gdx.graphics.width, Gdx.graphics.height, Gdx.files.internal("tileset.json"))
@@ -178,7 +189,8 @@ class GameManager {
 
         const val CAMERA_MOVEMENT_SPEED = 20
 
-        val camera = OrthographicCamera()
+        const val ZOOM_CAMERA = 3f
+        const val ZOOM_SPEED = 100f
 
         fun colliders(): ArrayList<LineSegment> {
             val lineSegments = arrayListOf<LineSegment>()

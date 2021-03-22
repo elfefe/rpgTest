@@ -3,7 +3,6 @@ package com.elfefe.rpgtest.utils.noise
 import com.badlogic.gdx.graphics.Color
 import com.elfefe.rpgtest.utils.SAND
 import com.elfefe.rpgtest.utils.fastFloor
-import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.log10
 import kotlin.random.Random
@@ -14,7 +13,7 @@ object MapNoise {
     private set
     var forest = Color.GREEN
         private set
-    var glace = Color.CYAN
+    var ice = Color.CYAN
         private set
 
     fun generateWhiteNoise(width: Int, height: Int, seed: Int = 0): Array<Array<Float>> {
@@ -104,7 +103,7 @@ object MapNoise {
         }
 
         println("Calculating beaches")
-        val sendNoise = generateSmoothNoise(generateWhiteNoise(width, height, seed), 7)
+//        val sendNoise = generateSmoothNoise(generateWhiteNoise(width, height, seed), 7)
 
 
         println("Calculating regions")
@@ -114,7 +113,7 @@ object MapNoise {
             val percent = 100f - ((y * 1F / height) * 100f)
             perlinNoise[x][y].run {
                 indice /= totalAmplitude
-                mappingColors(percent, sendNoise[x][y])
+                mappingColors(percent, 1f)
             }
         }
 
@@ -124,22 +123,42 @@ object MapNoise {
     private fun MapPixel.mappingColors(percent: Float, sand: Float) {
         ocean = Color(0f, 0.2f + indice, 0.63f, 1f)
         forest = Color(0f, 0.75f - indice / 2, 0f, 1f)
-        glace = Color(0f, 0.78f, 1f, 1f)
-        val neige = 0.3f * log10(percent) - 0.1f
-        color =
-                if (indice > neige || neige.isNaN()) Color.WHITE
-                else if (indice > 0.1f) {
-                    when {
-                        indice < 0.11f && sand > 0f -> SAND
-                        else -> forest
-                    }
-                } else {
-                    if (indice > neige - 0.05f) glace
-                    else ocean
+        ice = Color(0f, 0.78f, 1f, 1f)
+        val snow = 0.3f * log10(percent) - 0.1f
+        if (indice > snow || snow.isNaN()) {
+            biome = Biome.ICE
+            color = Color.WHITE
+        } else if (indice > 0.1f) {
+            when {
+                indice < 0.11f && sand > 0f -> {
+                    biome = Biome.SAND
+                    color = SAND
                 }
+                else -> {
+                    biome = Biome.FOREST
+                    color = forest
+                }
+            }
+        } else {
+            if (indice > snow - 0.05f) {
+                biome = Biome.ICE
+                color = ice
+            } else {
+                biome = Biome.OCEAN
+                color = ocean
+            }
+        }
     }
 
     private fun interpolate(x0: Float, x1: Float, alpha: Float) = x0 * (1 - alpha) + alpha * x1
 
-    data class MapPixel(var indice: Float, var color: Color)
+    data class MapPixel(var indice: Float, var color: Color, var biome: Biome = Biome.NOWHERE)
+
+    enum class Biome {
+        OCEAN,
+        FOREST,
+        SAND,
+        ICE,
+        NOWHERE
+    }
 }

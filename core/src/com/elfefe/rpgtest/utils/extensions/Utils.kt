@@ -59,3 +59,5 @@ fun drawDebugLine(start: Vector2, end: Vector2, color: Color = Color.RED) {
     debugRenderer.end()
     Gdx.gl.glDisable(GL20.GL_BLEND)
 }
+
+fun Any.log(text: String) = println("${this.javaClass.name} - $text")
