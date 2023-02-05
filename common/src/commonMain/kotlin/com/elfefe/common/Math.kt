@@ -6,13 +6,18 @@ import kotlin.math.max
 
 class Vector2(val x: Float, val y: Float)
 
+fun interpolate(a: Float, b: Float, proportion: Float) =
+    a + (b - a) * proportion
+
+fun Float.normalizeTo(max: Float) =
+    (this - max) * (1 / (1 - max))
 
 fun normalizeDirection(distance: Vector2): Vector2 {
     var normalizedX = if (distance.x != 0f) distance.x / abs(distance.x) else 0f
     var normalizedY = if (distance.y != 0f) distance.y / abs(distance.y) else 0f
 
     if (distance.x != 0f && distance.y != 0f) {
-        val maxDistance = Math.max(abs(distance.y), abs(distance.x))
+        val maxDistance = abs(distance.y).coerceAtLeast(abs(distance.x))
         if (maxDistance == abs(distance.y)) {
             normalizedX /= abs(distance.y) / abs(distance.x)
         } else if (maxDistance == abs(distance.x)) {

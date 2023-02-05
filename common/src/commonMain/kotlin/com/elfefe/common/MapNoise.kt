@@ -68,7 +68,7 @@ object MapNoise {
         return generateSmoothNoise(generateWhiteNoise(width, height, seed), 1)
     }
 
-    fun generatePerlinNoise(width: Int, height: Int, octaveCount: Int, seed: Int = 0): Array<Array<MapPixel>> {
+    fun generatePerlinNoise(width: Int, height: Int, octaveCount: Int, seed: Int = 0): Array<Array<Float>> {
         val smoothNoise: Array<Array<Array<Float>>> = Array(octaveCount) { Array(0) { Array(0) { 0f } } }
 
         val persistance = 0.5f
@@ -77,7 +77,7 @@ object MapNoise {
         for (i in 0 until octaveCount)
             smoothNoise[i] = generateSmoothNoise(generateWhiteNoise(width, height, seed), i)
 
-        val perlinNoise = Array(width) { Array(height) { MapPixel(0f, Color.Transparent) } }
+        val perlinNoise = Array(width) { Array(height) { 0f } }
         var amplitude = 1f
         var totalAmplitude = 0f
 
@@ -89,30 +89,23 @@ object MapNoise {
             for (i in 0 until width * height) {
                 val x = fastFloor(i / height / 1.0)
                 val y = i - (x * height)
-                perlinNoise[x][y].indice += smoothNoise[octave][x][y] * amplitude
+                perlinNoise[x][y] += smoothNoise[octave][x][y] * amplitude
             }
         }
-
-        println("Calculating beaches")
-        val sendNoise = generateSmoothNoise(generateWhiteNoise(width, height, seed), 7)
-
 
         println("Calculating regions")
         for (i in 0 until width * height) {
             val x = ceil(i / height / 1f).toInt()
             val y = i - (x * height)
-            val percent = 100f - ((y * 1F / height) * 100f)
-            perlinNoise[x][y].run {
-                indice /= totalAmplitude
-                mappingColors(percent, sendNoise[x][y])
-            }
+            perlinNoise[x][y] /= totalAmplitude
+            perlinNoise[x][y] += 0.5f
         }
 
         return perlinNoise
     }
 
     private fun MapPixel.mappingColors(percent: Float, sand: Float) {
-        val ocean = Color(0f, 0.2f + indice, 0.63f, 1f)
+        val ocean = Color(0f, 0f, 0.63f, 1f)
         val forest = Color(0f, 0.75f - indice / 2, 0f, 1f)
         val glace = Color(0f, 0.78f, 1f, 1f)
         val neige = 0.3f * log10(percent) - 0.1f

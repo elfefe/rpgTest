@@ -1,19 +1,25 @@
 package com.elfefe.common
 
+import androidx.compose.runtime.Composable
 import java.util.*
 import kotlin.math.floor
 
-class TerrainGenerator(
-    private val mapSize: Int,
-    private val octaves: Int = OCTAVES,
-    private val seed: Int = SEED
-) {
+object TerrainGenerator {
 
-    fun generateTerrain(progress: (Int) -> Unit = {}): Array<Array<MapNoise.MapPixel>> =
-        MapNoise.generatePerlinNoise(mapSize, mapSize, octaves, seed)
+    const val OCTAVES = 10
+    const val SEED = 0
 
-    companion object {
-        private const val OCTAVES = 10
-        private const val SEED = 0
+    const val MOUNTAIN_HEIGHT = 0.8f
+    const val SNOW_HEIGHT = 0.9f
+    const val LAGOON_HEIGHT = 0.45f
+
+    @Composable
+    fun generateTerrain(
+        mapSize: Int,
+        octaves: Int = OCTAVES,
+        seed: Int = SEED
+    ): Array<Array<Float>> {
+        println("Generate terrain")
+        return MapNoise.generatePerlinNoise(mapSize, mapSize, octaves, seed)
     }
 }
