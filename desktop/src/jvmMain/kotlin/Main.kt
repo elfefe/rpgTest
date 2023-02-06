@@ -4,6 +4,6 @@ import com.elfefe.common.App
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
-        App(window)
+        App()
     }
 }

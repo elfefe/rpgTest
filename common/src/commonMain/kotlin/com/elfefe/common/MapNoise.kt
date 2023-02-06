@@ -68,7 +68,7 @@ object MapNoise {
         return generateSmoothNoise(generateWhiteNoise(width, height, seed), 1)
     }
 
-    fun generatePerlinNoise(width: Int, height: Int, octaveCount: Int, seed: Int = 0): Array<Array<Float>> {
+    fun generatePerlinNoise(width: Int, height: Int, octaveCount: Int, seed: Int = 0): MutableList<MutableList<Float>> {
         val smoothNoise: Array<Array<Array<Float>>> = Array(octaveCount) { Array(0) { Array(0) { 0f } } }
 
         val persistance = 0.5f
@@ -77,7 +77,7 @@ object MapNoise {
         for (i in 0 until octaveCount)
             smoothNoise[i] = generateSmoothNoise(generateWhiteNoise(width, height, seed), i)
 
-        val perlinNoise = Array(width) { Array(height) { 0f } }
+        val perlinNoise = MutableList(width) { MutableList(height) { 0f } }
         var amplitude = 1f
         var totalAmplitude = 0f
 

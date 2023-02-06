@@ -20,6 +20,7 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
+                implementation("com.google.code.gson:gson:2.10.1")
             }
         }
         val commonTest by getting {

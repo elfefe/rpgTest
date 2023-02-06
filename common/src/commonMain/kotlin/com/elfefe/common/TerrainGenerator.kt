@@ -13,12 +13,11 @@ object TerrainGenerator {
     const val SNOW_HEIGHT = 0.9f
     const val LAGOON_HEIGHT = 0.45f
 
-    @Composable
     fun generateTerrain(
         mapSize: Int,
         octaves: Int = OCTAVES,
         seed: Int = SEED
-    ): Array<Array<Float>> {
+    ): MutableList<MutableList<Float>> {
         println("Generate terrain")
         return MapNoise.generatePerlinNoise(mapSize, mapSize, octaves, seed)
     }
